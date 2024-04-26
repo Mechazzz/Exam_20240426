@@ -1,35 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import { search } from "./lib/api";
+import Hotels from "./Hotels";
+
+export type selectedHotels = {
+  id: number;
+  name: string;
+  pricePerNightInUSD: number;
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [minimum, setMinimum] = useState(0);
+  const [maximum, setMaximum] = useState(0);
+  const [searchedHotels, setSearchedHotels] = useState(false);
+  const [hotels, setHotels] = useState<selectedHotels[]>([]);
+
+  const handleSearch = async () => {
+    const hotelsX = await search(minimum, maximum);
+    console.log(hotels);
+    setSearchedHotels(true);
+    setHotels((hotelsX as unknown as { data: selectedHotels[] }).data);
+    console.log(hotels);
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      {!searchedHotels && (
+        <main className="flex flex-col items-center py-16">
+          <section className="card card-body w-[300px] bg-primary text-primary-content mb-8">
+            <h2>Please enter the minimum and maximum price of the hotels</h2>
+            <label>Minimum price</label>
+            <input
+              value={minimum}
+              onChange={(e) => setMinimum(+e.target.value)}
+              className="input input-bordered"
+              type="number"
+              placeholder="Minimum"
+            />
+            <label>Maximum price</label>
+            <input
+              value={maximum}
+              onChange={(e) => setMaximum(+e.target.value)}
+              className="input input-bordered"
+              type="number"
+              placeholder="Maximum"
+            />
+            <button onClick={handleSearch} className="btn btn-success">
+              SEARCH
+            </button>
+          </section>
+        </main>
+      )}
+      {searchedHotels && (
+        <Hotels
+          hotels={hotels}
+          searchedHotels={searchedHotels}
+          setSearchedHotels={setSearchedHotels}
+        />
+      )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
